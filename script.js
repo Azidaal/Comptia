@@ -1,133 +1,109 @@
-// Flashcards data, categorized by topic (only 1.1 example here)
-const flashcards = [
-  {
-    category: "1.1 Laptop Hardware",
-    question: "Why are laptops considered unique computing environments?",
-    answers: [
-      "They are designed to fit a specific form factor",
-      "They use desktop parts",
-      "They never need repairs",
-      "They don’t have batteries"
-    ],
-    correct: 0
-  },
-  {
-    category: "1.1 Laptop Hardware",
-    question: "What type of batteries are commonly used in laptops?",
-    answers: [
-      "Nickel-cadmium batteries",
-      "Lithium-ion or lithium-ion polymer batteries",
-      "Lead-acid batteries",
-      "Alkaline batteries"
-    ],
-    correct: 1
-  },
-  {
-    category: "1.1 Laptop Hardware",
-    question: "What is a common form factor for laptop memory?",
-    answers: [
-      "DIMM",
-      "SO-DIMM",
-      "Micro-DIMM",
-      "Mini-DIMM"
-    ],
-    correct: 1
-  },
-  {
-    category: "1.1 Laptop Hardware",
-    question: "How can you access modular batteries in many laptops?",
-    answers: [
-      "By opening the entire laptop",
-      "By sliding and unlocking switches on the battery",
-      "By removing the keyboard",
-      "By detaching the display"
-    ],
-    correct: 1
-  },
-  {
-    category: "1.1 Laptop Hardware",
-    question: "What is an advantage of SSDs over traditional hard drives?",
-    answers: [
-      "They have moving parts",
-      "They are cheaper",
-      "They have faster read/write speeds",
-      "They use more power"
-    ],
-    correct: 2
-  },
-  // add more cards here...
-];
+const flashcards = {
+  "1.1": [
+    {
+      question: "Why are laptops often harder to repair than desktops?",
+      answer: "Laptops have a compact, unique form factor and are harder to access and repair internally."
+    },
+    {
+      question: "What are modular batteries in laptops?",
+      answer: "Modular batteries can be removed and replaced without disassembling the laptop."
+    },
+    {
+      question: "What battery types are common in laptops?",
+      answer: "Lithium-ion and lithium-ion polymer batteries are commonly used."
+    },
+    {
+      question: "What happens to a battery’s capacity over time?",
+      answer: "Each charge cycle slightly reduces the total capacity; eventually, it must be replaced."
+    },
+    {
+      question: "How is a laptop keyboard typically connected?",
+      answer: "Via a single ribbon cable to the motherboard."
+    },
+    {
+      question: "What is a SO-DIMM?",
+      answer: "Small Outline Dual Inline Memory Module used for laptop memory upgrades."
+    },
+    {
+      question: "Can all laptops upgrade RAM?",
+      answer: "No, some have soldered RAM which can't be upgraded without replacing the motherboard."
+    },
+    {
+      question: "What is the benefit of SSDs over HDDs in laptops?",
+      answer: "SSDs are faster, more durable, and have no moving parts."
+    },
+    {
+      question: "What are M.2 drives?",
+      answer: "Compact SSDs that use M.2 interface, offering high-speed storage in a small form factor."
+    },
+    {
+      question: "What is drive imaging used for in upgrades?",
+      answer: "To clone an old drive to a new one, transferring OS, data, and apps easily."
+    },
+    {
+      question: "How is wireless functionality integrated in laptops?",
+      answer: "Via built-in chips or Mini PCI/PCIe cards for Wi-Fi, Bluetooth, and WWAN."
+    },
+    {
+      question: "What is biometric authentication on laptops?",
+      answer: "Using facial recognition or fingerprint scanning to log into the system."
+    },
+    {
+      question: "What is NFC and how is it used in laptops?",
+      answer: "Near-field communication allows for wireless authentication using phones or badges."
+    }
+  ]
+};
 
-// Utility to get URL parameters
-function getParam(param) {
-  const url = new URL(window.location);
-  return url.searchParams.get(param);
-}
-
-const questionContainer = document.getElementById('question-container');
-const answersContainer = document.getElementById('answers-container');
-const nextBtn = document.getElementById('next-btn');
-const customOptions = document.getElementById('custom-options');
-const numQuestionsInput = document.getElementById('numQuestions');
-const startCustomBtn = document.getElementById('startCustom');
-
-let currentCards = [];
+let currentCategory = "1.1";
 let currentIndex = 0;
+let showingAnswer = false;
 
-function shuffleArray(arr) {
-  return arr.sort(() => Math.random() - 0.5);
-}
+const questionDiv = document.getElementById("question");
+const answerDiv = document.getElementById("answer");
+const categorySelect = document.getElementById("category-select");
 
 function loadCategories() {
-  const categoriesList = document.getElementById('categories-list');
-  if (!categoriesList) return;
-  const categories = [...new Set(flashcards.map(c => c.category))];
-  categoriesList.innerHTML = '';
-  categories.forEach(cat => {
-    const li = document.createElement('li');
-    li.textContent = cat;
-    li.onclick = () => {
-      currentCards = flashcards.filter(c => c.category === cat);
-      currentIndex = 0;
-      sessionStorage.setItem('cards', JSON.stringify(currentCards));
-      sessionStorage.setItem('index', currentIndex);
-      window.location.href = 'quiz.html';
-    };
-    categoriesList.appendChild(li);
+  Object.keys(flashcards).forEach(cat => {
+    const option = document.createElement("option");
+    option.value = cat;
+    option.textContent = `Video ${cat}`;
+    categorySelect.appendChild(option);
+  });
+  categorySelect.value = currentCategory;
+  categorySelect.addEventListener("change", () => {
+    currentCategory = categorySelect.value;
+    currentIndex = 0;
+    renderCard();
   });
 }
 
-function startQuiz(cards) {
-  currentCards = cards;
-  currentIndex = 0;
-  showQuestion();
+function renderCard() {
+  const card = flashcards[currentCategory][currentIndex];
+  questionDiv.textContent = card.question;
+  answerDiv.textContent = card.answer;
+  answerDiv.classList.add("hidden");
+  showingAnswer = false;
 }
 
-function showQuestion() {
-  clearFeedback();
-  nextBtn.style.display = 'none';
-  answersContainer.innerHTML = '';
-  if (currentIndex >= currentCards.length) {
-    questionContainer.textContent = "Quiz complete! Well done.";
-    return;
+function flipCard() {
+  showingAnswer = !showingAnswer;
+  answerDiv.classList.toggle("hidden");
+}
+
+function nextCard() {
+  if (currentIndex < flashcards[currentCategory].length - 1) {
+    currentIndex++;
+    renderCard();
   }
-  const card = currentCards[currentIndex];
-  questionContainer.textContent = `${card.category} - Q${currentIndex + 1}: ${card.question}`;
-  card.answers.forEach((answer, i) => {
-    const btn = document.createElement('button');
-    btn.textContent = answer;
-    btn.onclick = () => selectAnswer(i);
-    answersContainer.appendChild(btn);
-  });
 }
 
-function clearFeedback() {
-  Array.from(answersContainer.children).forEach(btn => {
-    btn.disabled = false;
-    btn.classList.remove('correct', 'wrong');
-  });
+function prevCard() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    renderCard();
+  }
 }
 
-function selectAnswer(selectedIndex) {
-  const card = currentCards[currentIndex];
-  const
+loadCategories();
+renderCard();

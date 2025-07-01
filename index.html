@@ -2,16 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CompTIA A+ Flashcards</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>CompTIA A+ Flashcards</h1>
-  <div class="menu">
-    <button onclick="location.href='quiz.html?mode=quick'">Quick Test (15 random)</button>
-    <button onclick="location.href='quiz.html?mode=custom'">Custom Test</button>
-    <button onclick="location.href='categories.html'">Categories</button>
+  <div class="container">
+    <h1>CompTIA A+ Flashcards</h1>
+    <select id="category-select"></select>
+    <div id="flashcard" class="card">
+      <div id="question"></div>
+      <div id="answer" class="hidden"></div>
+    </div>
+    <div class="controls">
+      <button onclick="prevCard()">Previous</button>
+      <button onclick="flipCard()">Flip</button>
+      <button onclick="nextCard()">Next</button>
+    </div>
   </div>
+  <script src="script.js"></script>
 </body>
 </html>
