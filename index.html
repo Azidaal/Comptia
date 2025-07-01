@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CompTIA Flashcard Quiz</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+  .card { background: white; padding: 20px; max-width: 600px; margin: auto; border-radius: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.1); }
+  .question { font-size: 1.2em; margin-bottom: 20px; }
+  .answers { list-style: none; padding: 0; }
+  .answers li { margin: 10px 0; }
+  button.answer-btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    border: 2px solid #007bff;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+  }
+  button.answer-btn:hover { background: #e7f0ff; }
+  button.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+  button.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+  .next-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 1em;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .next-btn:disabled { background: #ccc; cursor: not-allowed; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="question" id="question">Question text</div>
+  <ul class="answers" id="answers">
+  </ul>
+  <button id="nextBtn" class="next-btn" disabled>Next Question</button>
+</div>
+
+<script>
+const flashcards = [
+  {
+    question: "What is the primary input device of a laptop?",
+    answers: [
+      "Touchpad",
+      "Keyboard",
+      "Trackball",
+      "Stylus"
+    ],
+    correct: 1
+  },
+  {
+    question: "Which memory module form factor is commonly used in laptops?",
+    answers: [
+      "DIMM",
+      "SO-DIMM",
+      "SIMM",
+      "RIMM"
+    ],
+    correct: 1
+  },
+  {
+    question: "What battery technologies are most commonly used in modern laptops?",
+    answers: [
+      "Nickel-Cadmium",
+      "Lead Acid",
+      "Lithium Ion or Lithium-ion Polymer",
+      "Alkaline"
+    ],
+    correct: 2
+  },
+  {
+    question: "What storage device offers faster read/write speeds in laptops?",
+    answers: [
+      "Hard Disk Drive (HDD)",
+      "Solid State Drive (SSD)",
+      "Optical Drive",
+      "Floppy Disk"
+    ],
+    correct: 1
+  },
+  {
+    question: "What wireless technologies are commonly built into laptop motherboards?",
+    answers: [
+      "802.11 and Bluetooth",
+      "Infrared and NFC",
+      "USB and Ethernet",
+      "Thunderbolt and HDMI"
+    ],
+    correct: 0
+  },
+  {
+    question: "What biometric authentication method uses a fingerprint sensor?",
+    answers: [
+      "Windows Hello Face",
+      "Windows Hello Fingerprint",
+      "Password",
+      "PIN"
+    ],
+    correct: 1
+  },
+  {
+    question: "What does NFC stand for?",
+    answers: [
+      "Near Field Communication",
+      "Network Frequency Control",
+      "Near Frequency Communication",
+      "Network File Connection"
+    ],
+    correct: 0
+  },
+  {
+    question: "Which component is usually connected with a ribbon cable in laptops?",
+    answers: [
+      "Battery",
+      "Keyboard",
+      "Hard Drive",
+      "Memory Module"
+    ],
+    correct: 1
+  }
+];
+
+let currentQuestion = 0;
+
+const questionEl = document.getElementById('question');
+const answersEl = document.getElementById('answers');
+const nextBtn = document.getElementById('nextBtn');
+
+function loadQuestion() {
+  nextBtn.disabled = true;
+  questionEl.textContent = flashcards[currentQuestion].question;
+  answersEl.innerHTML = '';
+  flashcards[currentQuestion].answers.forEach((answer, index) => {
+    const li = document.createElement('li');
+    const button = document.createElement('button');
+    button.classList.add('answer-btn');
+    button.textContent = answer;
+    button.addEventListener('click', () => selectAnswer(index, button));
+    li.appendChild(button);
+    answersEl.appendChild(li);
+  });
+}
+
+function selectAnswer(selectedIndex, button) {
+  // Disable all buttons after one is selected
+  Array.from(answersEl.children).forEach(li => {
+    li.firstChild.disabled = true;
+  });
+  
+  const correctIndex = flashcards[currentQuestion].correct;
+
+  if (selectedIndex === correctIndex) {
+    button.classList.add('correct');
+  } else {
+    button.classList.add('wrong');
+    // Highlight correct answer in green
+    answersEl.children[correctIndex].firstChild.classList.add('correct');
+  }
+  nextBtn.disabled = false;
+}
+
+nextBtn.addEventListener('click', () => {
+  currentQuestion++;
+  if (currentQuestion >= flashcards.length) {
+    alert('Quiz completed!');
+    currentQuestion = 0;
+  }
+  loadQuestion();
+});
+
+loadQuestion();
+</script>
+</body>
+</html>
