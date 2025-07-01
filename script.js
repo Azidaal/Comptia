@@ -1,133 +1,86 @@
-// Flashcards data, categorized by topic (only 1.1 example here)
-const flashcards = [
-  {
-    category: "1.1 Laptop Hardware",
-    question: "Why are laptops considered unique computing environments?",
-    answers: [
-      "They are designed to fit a specific form factor",
-      "They use desktop parts",
-      "They never need repairs",
-      "They don’t have batteries"
-    ],
-    correct: 0
-  },
-  {
-    category: "1.1 Laptop Hardware",
-    question: "What type of batteries are commonly used in laptops?",
-    answers: [
-      "Nickel-cadmium batteries",
-      "Lithium-ion or lithium-ion polymer batteries",
-      "Lead-acid batteries",
-      "Alkaline batteries"
-    ],
-    correct: 1
-  },
-  {
-    category: "1.1 Laptop Hardware",
-    question: "What is a common form factor for laptop memory?",
-    answers: [
-      "DIMM",
-      "SO-DIMM",
-      "Micro-DIMM",
-      "Mini-DIMM"
-    ],
-    correct: 1
-  },
-  {
-    category: "1.1 Laptop Hardware",
-    question: "How can you access modular batteries in many laptops?",
-    answers: [
-      "By opening the entire laptop",
-      "By sliding and unlocking switches on the battery",
-      "By removing the keyboard",
-      "By detaching the display"
-    ],
-    correct: 1
-  },
-  {
-    category: "1.1 Laptop Hardware",
-    question: "What is an advantage of SSDs over traditional hard drives?",
-    answers: [
-      "They have moving parts",
-      "They are cheaper",
-      "They have faster read/write speeds",
-      "They use more power"
-    ],
-    correct: 2
-  },
-  // add more cards here...
-];
+let currentQuestionIndex = 0;
+let score = 0;
+let selectedQuestions = [];
 
-// Utility to get URL parameters
-function getParam(param) {
-  const url = new URL(window.location);
-  return url.searchParams.get(param);
+function startQuiz() {
+    const category = document.getElementById("category").value;
+    const count = parseInt(document.getElementById("question-count").value);
+    const categoryQuestions = questions[category] || [];
+    selectedQuestions = shuffle(categoryQuestions).slice(0, count);
+    score = 0;
+    currentQuestionIndex = 0;
+    showQuizScreen();
+    showQuestion();
 }
 
-const questionContainer = document.getElementById('question-container');
-const answersContainer = document.getElementById('answers-container');
-const nextBtn = document.getElementById('next-btn');
-const customOptions = document.getElementById('custom-options');
-const numQuestionsInput = document.getElementById('numQuestions');
-const startCustomBtn = document.getElementById('startCustom');
-
-let currentCards = [];
-let currentIndex = 0;
-
-function shuffleArray(arr) {
-  return arr.sort(() => Math.random() - 0.5);
+function startQuickQuiz() {
+    let allQuestions = Object.values(questions).flat();
+    selectedQuestions = shuffle(allQuestions).slice(0, 5);
+    score = 0;
+    currentQuestionIndex = 0;
+    showQuizScreen();
+    showQuestion();
 }
 
-function loadCategories() {
-  const categoriesList = document.getElementById('categories-list');
-  if (!categoriesList) return;
-  const categories = [...new Set(flashcards.map(c => c.category))];
-  categoriesList.innerHTML = '';
-  categories.forEach(cat => {
-    const li = document.createElement('li');
-    li.textContent = cat;
-    li.onclick = () => {
-      currentCards = flashcards.filter(c => c.category === cat);
-      currentIndex = 0;
-      sessionStorage.setItem('cards', JSON.stringify(currentCards));
-      sessionStorage.setItem('index', currentIndex);
-      window.location.href = 'quiz.html';
-    };
-    categoriesList.appendChild(li);
-  });
-}
-
-function startQuiz(cards) {
-  currentCards = cards;
-  currentIndex = 0;
-  showQuestion();
+function showQuizScreen() {
+    document.getElementById("main-menu").classList.add("hidden");
+    document.getElementById("quiz-screen").classList.remove("hidden");
+    document.getElementById("result-screen").classList.add("hidden");
 }
 
 function showQuestion() {
-  clearFeedback();
-  nextBtn.style.display = 'none';
-  answersContainer.innerHTML = '';
-  if (currentIndex >= currentCards.length) {
-    questionContainer.textContent = "Quiz complete! Well done.";
-    return;
-  }
-  const card = currentCards[currentIndex];
-  questionContainer.textContent = `${card.category} - Q${currentIndex + 1}: ${card.question}`;
-  card.answers.forEach((answer, i) => {
-    const btn = document.createElement('button');
-    btn.textContent = answer;
-    btn.onclick = () => selectAnswer(i);
-    answersContainer.appendChild(btn);
-  });
+    const questionObj = selectedQuestions[currentQuestionIndex];
+    document.getElementById("question-number").textContent = 
+        \`Question \${currentQuestionIndex + 1} of \${selectedQuestions.length}\`;
+    document.getElementById("score-display").textContent = \`Score: \${score}\`;
+
+    document.getElementById("question").textContent = questionObj.question;
+    const answersDiv = document.getElementById("answers");
+    answersDiv.innerHTML = "";
+    shuffle(questionObj.choices).forEach(choice => {
+        const btn = document.createElement("button");
+        btn.textContent = choice;
+        btn.className = "answer-btn";
+        btn.onclick = () => selectAnswer(btn, choice === questionObj.answer);
+        answersDiv.appendChild(btn);
+    });
+
+    document.getElementById("next-btn").classList.add("hidden");
 }
 
-function clearFeedback() {
-  Array.from(answersContainer.children).forEach(btn => {
-    btn.disabled = false;
-    btn.classList.remove('correct', 'wrong');
-  });
+function selectAnswer(button, isCorrect) {
+    const buttons = document.querySelectorAll(".answer-btn");
+    buttons.forEach(btn => btn.disabled = true);
+    if (isCorrect) {
+        button.classList.add("correct");
+        score++;
+    } else {
+        button.classList.add("incorrect");
+        buttons.forEach(btn => {
+            if (btn.textContent === selectedQuestions[currentQuestionIndex].answer) {
+                btn.classList.add("correct");
+            }
+        });
+    }
+    document.getElementById("next-btn").classList.remove("hidden");
 }
 
-function selectAnswer(selectedIndex) {
-  const card = currentCards[currentIndex];
-  const
+function nextQuestion() {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < selectedQuestions.length) {
+        showQuestion();
+    } else {
+        showResult();
+    }
+}
+
+function showResult() {
+    document.getElementById("quiz-screen").classList.add("hidden");
+    document.getElementById("result-screen").classList.remove("hidden");
+    document.getElementById("final-score").textContent = 
+        \`You scored \${score} out of \${selectedQuestions.length}.\`;
+}
+
+function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+}
